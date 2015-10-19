@@ -6,9 +6,12 @@ import queue
 
 class Player2048:
 
-	def __init__(self, display=True):
+	def __init__(self, display=True, board_obj=None):
 		"""Initializes a 2048 Player that plays the game"""
-		self.b = game_simulator.Board2048(display)
+		if board_obj:
+			self.b = board_obj
+		else:
+			self.b = game_simulator.Board2048(display)
 
 	def play_game(self, display=True):
 		"""Uses decision tree to achieve highest possible 2048 score"""

@@ -1,5 +1,7 @@
 import tkinter as tk
-import game_simulator as sim 
+import game_simulator as sim
+import engine as ai
+from time import sleep
 
 # Constants
 square_dim = 100
@@ -28,8 +30,8 @@ size_map = {    2 : 60,
 			  128 : 36,
 			  256 : 36,
 			  512 : 36,
-			 1024 : 24,
-			 2048 : 24
+			 1024 : 36,
+			 2048 : 36
 		   }
 
 offset_map = {    2 : 35,
@@ -41,8 +43,8 @@ offset_map = {    2 : 35,
 			    128 : 20,
 			    256 : 20,
 			    512 : 20,
-			   1024 : 5,
-			   2048 : 5
+			   1024 : 12,
+			   2048 : 12
 		     }
 
 # Initializations
@@ -50,18 +52,19 @@ root = tk.Tk()
 root.title("2048")
 
 b = sim.Board2048()
+p = ai.Player2048(board_obj=b)
 
 canvas = tk.Canvas(root, width=canvas_width,height=canvas_height)
 canvas.pack()
 
 def generate_board():
 	"""Generates the current board configuration"""
+	# score_label.config(text=str(b.score))
+	# score_label.after(100, generate_board)
 	for i in range(len(b.board)):
 		for j in range(len(b.board[0])):
 			num = b.board[i][j]
 			background_color = color_map[num]
-			if num != 0:
-				print(i, j)
 			canvas.create_rectangle(j*100, i*100, (j+1)*100, (i+1)*100, fill=background_color)
 			if num != 0:
 				if num == 2 or num == 4:
@@ -73,20 +76,38 @@ def generate_board():
 def check_key_pressed(event):
 	"""Checks if a swipe has been performed, and updates the board appropriately"""
 	if event.keysym == 'Left':
-		b.swipe_left()
+		b.swipe_left(False)
 	elif event.keysym == 'Right':
-		b.swipe_right()
+		b.swipe_right(False)
 	elif event.keysym == 'Up':
-		b.swipe_up()
+		b.swipe_up(False)
 	elif event.keysym == 'Down':
-		b.swipe_down()
+		b.swipe_down(False)
 	generate_board()
 	root.after(100, check_key_pressed)
 
-# Set up and loop
-button = tk.Button(root, text='New Game', width=25, command=b.reset_board)
-generate_board()
+def new_game():
+	"""Functional argument to button object to restart game"""
+	b.reset_board()
+	generate_board()
+
+def ai_play():
+	p.make_move(False)
+	generate_board()
+	root.after(100, ai_play)
+
+# Set up
+button = tk.Button(root, text='New Game', width=25, command=new_game)
+# score_label = tk.Label(root, bg="#bbada0")
+# score_label.pack()
 button.pack()
-root.bind_all('<KeyPress>', check_key_pressed)
-root.after(100, check_key_pressed)
+# b.board = [[2048, 1024, 512, 256], [16, 32, 64, 128], [8, 4, 2, 0], [0, 0, 0, 0]]
+
+# Begin root loop
+generate_board()
+if False:
+	root.bind_all('<KeyPress>', check_key_pressed)
+	root.after(100, check_key_pressed)
+else:
+	root.after(100, ai_play)
 root.mainloop()
